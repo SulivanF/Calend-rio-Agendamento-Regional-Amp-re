@@ -6,182 +6,153 @@
     <title>Agenda Regional Ampére</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        body { background-color: #000; color: #fff; }
-    </style>
+    <style> body { background-color: #000; color: #fff; } </style>
 </head>
 <body class="min-h-screen p-4 md:p-8">
-
-<div class="max-w-6xl mx-auto space-y-6">
-    <!-- HEADER -->
-    <header class="flex items-center justify-between bg-[#111111] p-6 rounded-2xl border border-[#222222] shadow-xl">
-        <div class="flex items-center gap-4">
-            <div class="p-3 bg-indigo-600/10 text-indigo-400 rounded-xl border border-indigo-500/20">
-                <i data-lucide="map-pin" class="w-6 h-6"></i>
-            </div>
-            <div>
-                <h1 class="text-xl font-bold">Agenda Regional Ampére</h1>
-                <p class="text-xs opacity-60">Sincronização para Ampére - PR</p>
-            </div>
-        </div>
-    </header>
-
-    <!-- GRID PRINCIPAL -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- CALENDÁRIO -->
-        <div class="lg:col-span-2 bg-[#111111] p-6 rounded-2xl border border-[#222222] shadow-xl space-y-6">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <button id="prev-month" class="p-2 hover:bg-neutral-800 rounded-lg"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
-                    <h2 id="month-year" class="text-lg font-semibold capitalize"></h2>
-                    <button id="next-month" class="p-2 hover:bg-neutral-800 rounded-lg"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
+    <div class="max-w-6xl mx-auto space-y-6">
+        <!-- HEADER -->
+        <header class="flex items-center justify-between bg-[#111111] p-6 rounded-2xl border border-[#222222] shadow-xl">
+            <div class="flex items-center gap-4">
+                <div class="p-3 bg-indigo-600/10 text-indigo-400 rounded-xl border border-indigo-500/20">
+                    <i data-lucide="map-pin" class="w-6 h-6"></i>
                 </div>
-                <button id="go-today" class="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-sm rounded-xl">Ir para hoje</button>
-            </div>
-            <div class="grid grid-cols-7 gap-2 text-center text-xs font-bold uppercase opacity-60">
-                <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
-            </div>
-            <div id="days-grid" class="grid grid-cols-7 gap-2"></div>
-        </div>
-
-        <!-- PAINEL -->
-        <div class="bg-[#111111] p-6 rounded-2xl border border-[#222222] shadow-xl flex flex-col min-h-[450px]">
-            <div class="space-y-4 flex-grow">
                 <div>
-                    <span class="text-[10px] font-bold text-indigo-400 uppercase">Data Selecionada</span>
-                    <h3 id="date-title" class="text-lg font-bold">Selecione um dia</h3>
+                    <h1 class="text-xl font-bold">Agenda Regional Ampére</h1>
                 </div>
+            </div>
+        </header>
 
-                <div id="event-alert" class="hidden p-3 bg-indigo-900/20 border border-indigo-500/30 rounded-xl">
-                    <p class="text-xs text-indigo-300 font-bold uppercase mb-1">Eventos do dia:</p>
-                    <div id="events-highlight" class="text-sm"></div>
+        <!-- GRID PRINCIPAL -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- CALENDÁRIO -->
+            <div class="lg:col-span-2 bg-[#111111] p-6 rounded-2xl border border-[#222222] shadow-xl space-y-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <button id="prev-month" class="p-2 hover:bg-neutral-800 rounded-lg"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
+                        <h2 id="month-year" class="text-lg font-semibold capitalize"></h2>
+                        <button id="next-month" class="p-2 hover:bg-neutral-800 rounded-lg"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
+                    </div>
+                    <button id="go-today" class="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-sm rounded-xl">Ir para hoje</button>
                 </div>
-
-                <button id="btn-new" class="w-full flex items-center justify-center gap-2 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-medium hidden">
-                    <i data-lucide="plus" class="w-4 h-4"></i> Novo Evento
-                </button>
-
-                <div id="input-area" class="space-y-2 hidden">
-                    <textarea id="event-text" class="w-full p-3 bg-neutral-900 border border-neutral-700 rounded-xl text-sm outline-none" placeholder="Digite o compromisso..."></textarea>
-                    <button id="save-event" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-sm font-bold">Salvar</button>
+                <div class="grid grid-cols-7 gap-2 text-center text-xs font-bold uppercase opacity-60">
+                    <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
                 </div>
-
-                <div id="events-list" class="space-y-2"></div>
+                <div id="days-grid" class="grid grid-cols-7 gap-2"></div>
             </div>
 
-            <div class="border-t border-[#222222] pt-4 mt-6">
-                <p class="text-[11px] font-bold text-neutral-500 text-center uppercase tracking-wider">
-                    Preencha seu nome
-                </p>
+            <!-- PAINEL -->
+            <div class="bg-[#111111] p-6 rounded-2xl border border-[#222222] shadow-xl flex flex-col min-h-[450px]">
+                <div class="space-y-4 flex-grow">
+                    <div>
+                        <span class="text-[10px] font-bold text-indigo-400 uppercase">Data Selecionada</span>
+                        <h3 id="date-title" class="text-md font-bold">Selecione um dia</h3>
+                    </div>
+                    <div id="event-alert" class="hidden p-3 bg-indigo-900/20 border border-indigo-500/30 rounded-xl">
+                        <p class="text-xs text-indigo-300 font-bold uppercase mb-1">Eventos do dia:</p>
+                        <div id="events-highlight" class="text-sm"></div>
+                    </div>
+                    
+                    <button id="btn-new" class="w-full flex items-center justify-center gap-2 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-medium">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Novo Evento
+                    </button>
+                    
+                    <div id="input-area" class="space-y-2 hidden">
+                        <textarea id="event-text" class="w-full p-3 bg-neutral-900 border border-neutral-700 rounded-xl text-sm outline-none" placeholder="Digite o compromisso..."></textarea>
+                        <button id="save-event" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-sm font-bold">Salvar</button>
+                    </div>
+                    <div id="events-list" class="space-y-2"></div>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-    let current = new Date();
-    let selectedDate = "";
-    let data = JSON.parse(localStorage.getItem('agenda_data')) || { events: {} };
+    <script>
+        let current = new Date();
+        let selectedDate = "";
+        let data = JSON.parse(localStorage.getItem('agenda_data')) || { events: {} };
+        const today = new Date();
+        const todayKey = `${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`;
 
-    const today = new Date();
-    const todayKey = `${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`;
+        function render() {
+            const grid = document.getElementById('days-grid');
+            grid.innerHTML = "";
+            const year = current.getFullYear();
+            const month = current.getMonth();
+            const first = new Date(year, month, 1).getDay();
+            const last = new Date(year, month + 1, 0).getDate();
+            document.getElementById('month-year').textContent = current.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
 
-    function render() {
-        const grid = document.getElementById('days-grid');
-        grid.innerHTML = "";
-        const year = current.getFullYear();
-        const month = current.getMonth();
-        const first = new Date(year, month, 1).getDay();
-        const last = new Date(year, month + 1, 0).getDate();
-        
-        document.getElementById('month-year').textContent = current.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-        
-        for(let i=0; i<first; i++) grid.appendChild(document.createElement('div'));
-        
-        for(let d=1; d<=last; d++) {
-            const key = `${year}-${month+1}-${d}`;
-            const btn = document.createElement('button');
-            btn.textContent = d;
-            
-            const hasEvent = data.events[key] && data.events[key].length > 0;
-            const isToday = key === todayKey;
-            
-            // Estilos: Destaque para hoje, destaque para selecionado e borda para eventos
-            let classes = `p-4 rounded-xl text-sm font-bold transition-all `;
-            classes += isToday ? 'bg-indigo-600 ring-4 ring-indigo-500/50 ' : 'hover:bg-neutral-800 ';
-            if(hasEvent && !isToday) classes += 'bg-indigo-600/20 border border-indigo-500 ';
-            if(selectedDate === key) classes += 'ring-2 ring-white ';
-            
-            btn.className = classes;
-            btn.onclick = () => {
-                selectedDate = key;
-                document.getElementById('date-title').textContent = new Date(year, month, d).toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'short' });
-                document.getElementById('btn-new').classList.remove('hidden');
-                renderEvents();
-                render();
-            };
-            grid.appendChild(btn);
-        }
-        lucide.createIcons();
-    }
+            for(let i=0; i<first; i++) grid.appendChild(document.createElement('div'));
 
-    function renderEvents() {
-        const list = document.getElementById('events-list');
-        const alertBox = document.getElementById('event-alert');
-        const highlight = document.getElementById('events-highlight');
-        list.innerHTML = "";
-        const dayEvents = data.events[selectedDate] || [];
-        
-        if (dayEvents.length > 0) {
-            alertBox.classList.remove('hidden');
-            highlight.textContent = `${dayEvents.length} evento(s) marcado(s).`;
-        } else {
-            alertBox.classList.add('hidden');
+            for(let d=1; d<=last; d++) {
+                const key = `${year}-${month+1}-${d}`;
+                const btn = document.createElement('button');
+                btn.textContent = d;
+                const hasEvent = data.events[key] && data.events[key].length > 0;
+                const isToday = key === todayKey;
+                let classes = `p-4 rounded-xl text-sm font-bold transition-all `;
+                classes += isToday ? 'bg-indigo-600 ring-4 ring-indigo-500/50 ' : 'hover:bg-neutral-800 ';
+                if(hasEvent && !isToday) classes += 'bg-indigo-600/20 border border-indigo-500 ';
+                if(selectedDate === key) classes += 'ring-2 ring-white ';
+                btn.className = classes;
+                btn.onclick = () => {
+                    selectedDate = key;
+                    document.getElementById('date-title').textContent = new Date(year, month, d).toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'short' });
+                    renderEvents();
+                    render();
+                };
+                grid.appendChild(btn);
+            }
+            lucide.createIcons();
         }
 
-        dayEvents.forEach((e, i) => {
-            list.innerHTML += `
-                <div class="p-3 bg-neutral-900 rounded-xl text-sm border border-neutral-800 flex justify-between items-center">
-                    <p class="font-medium">${e.text}</p>
-                    <button onclick="deleteEvent(${i})" class="text-red-500 hover:text-red-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                </div>`;
-        });
-        lucide.createIcons();
-    }
+        function renderEvents() {
+            const list = document.getElementById('events-list');
+            const alertBox = document.getElementById('event-alert');
+            const highlight = document.getElementById('events-highlight');
+            list.innerHTML = "";
+            const dayEvents = data.events[selectedDate] || [];
+            if (dayEvents.length > 0) {
+                alertBox.classList.remove('hidden');
+                highlight.textContent = `${dayEvents.length} evento(s) marcado(s).`;
+            } else {
+                alertBox.classList.add('hidden');
+            }
+            dayEvents.forEach((e, i) => {
+                list.innerHTML += `
+                    <div class="p-3 bg-neutral-900 rounded-xl text-sm border border-neutral-800 flex justify-between items-center">
+                        <p class="font-medium">${e.text}</p>
+                        <button onclick="deleteEvent(${i})" class="text-red-500 hover:text-red-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </div>`;
+            });
+            lucide.createIcons();
+        }
 
-    window.deleteEvent = (index) => {
-        data.events[selectedDate].splice(index, 1);
-        localStorage.setItem('agenda_data', JSON.stringify(data));
+        window.deleteEvent = (index) => {
+            data.events[selectedDate].splice(index, 1);
+            localStorage.setItem('agenda_data', JSON.stringify(data));
+            render();
+            renderEvents();
+        };
+
+        document.getElementById('save-event').onclick = () => {
+            const text = document.getElementById('event-text').value;
+            if(!text || !selectedDate) return;
+            if(!data.events[selectedDate]) data.events[selectedDate] = [];
+            data.events[selectedDate].push({ text });
+            localStorage.setItem('agenda_data', JSON.stringify(data));
+            document.getElementById('event-text').value = "";
+            document.getElementById('input-area').classList.add('hidden');
+            render();
+            renderEvents();
+        };
+
+        document.getElementById('btn-new').onclick = () => document.getElementById('input-area').classList.toggle('hidden');
+        document.getElementById('prev-month').onclick = () => { current.setMonth(current.getMonth()-1); render(); };
+        document.getElementById('next-month').onclick = () => { current.setMonth(current.getMonth()+1); render(); };
+        document.getElementById('go-today').onclick = () => { current = new Date(); selectedDate = todayKey; render(); renderEvents(); };
+
         render();
-        renderEvents();
-    };
-
-    document.getElementById('save-event').onclick = () => {
-        const text = document.getElementById('event-text').value;
-        if(!text) return;
-        if(!data.events[selectedDate]) data.events[selectedDate] = [];
-        data.events[selectedDate].push({ text });
-        
-        localStorage.setItem('agenda_data', JSON.stringify(data));
-        document.getElementById('event-text').value = "";
-        document.getElementById('input-area').classList.add('hidden');
-        render();
-        renderEvents();
-    };
-
-    document.getElementById('btn-new').onclick = () => document.getElementById('input-area').classList.toggle('hidden');
-    
-    document.getElementById('prev-month').onclick = () => { current.setMonth(current.getMonth()-1); render(); };
-    document.getElementById('next-month').onclick = () => { current.setMonth(current.getMonth()+1); render(); };
-    
-    document.getElementById('go-today').onclick = () => { 
-        current = new Date(); 
-        selectedDate = todayKey; // Seleciona automaticamente o dia de hoje
-        render(); 
-        renderEvents();
-    };
-
-    render();
-</script>
+    </script>
 </body>
 </html>
