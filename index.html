@@ -53,24 +53,17 @@
                         <div id="events-highlight" class="text-sm"></div>
                     </div>
 
-                    <button id="btn-vacation" class="w-full flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-500 rounded-xl font-medium">
-                        <i data-lucide="sun" class="w-4 h-4"></i> + Férias
-                    </button>
-                    
-                    <button id="btn-audit" class="w-full flex items-center justify-center gap-2 py-3 bg-red-600 hover:bg-red-500 rounded-xl font-medium">
-                        <i data-lucide="alert-triangle" class="w-4 h-4"></i> + Auditoria
-                    </button>
+                    <!-- BOTÕES QUE ALTERNAM O TIPO -->
+                    <button id="btn-vacation" class="w-full flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-500 rounded-xl font-medium transition-all"> <i data-lucide="sun" class="w-4 h-4"></i> Férias </button>
+                    <button id="btn-audit" class="w-full flex items-center justify-center gap-2 py-3 bg-red-600 hover:bg-red-500 rounded-xl font-medium transition-all"> <i data-lucide="alert-triangle" class="w-4 h-4"></i> Auditoria </button>
+                    <button id="btn-medical" class="w-full flex items-center justify-center gap-2 py-3 bg-yellow-500 hover:bg-yellow-400 text-black rounded-xl font-medium transition-all"> <i data-lucide="file-text" class="w-4 h-4"></i> Atestado </button>
 
-                    <button id="btn-medical" class="w-full flex items-center justify-center gap-2 py-3 bg-yellow-500 hover:bg-yellow-400 text-black rounded-xl font-medium">
-                        <i data-lucide="file-text" class="w-4 h-4"></i> Atestado
-                    </button>
-
-                    <div id="input-area" class="space-y-2 hidden">
+                    <div id="input-area" class="space-y-2 hidden border-t border-neutral-800 pt-4">
+                        <p id="type-label" class="text-xs font-bold text-indigo-400 uppercase"></p>
                         <textarea id="event-text" class="w-full p-3 bg-neutral-900 border border-neutral-700 rounded-xl text-sm outline-none" placeholder="Digite o compromisso..."></textarea>
                         <input type="hidden" id="event-type">
                         <button id="save-event" class="w-full py-2 bg-blue-600 hover:bg-blue-500 rounded-xl text-sm font-bold">Salvar</button>
                     </div>
-                    
                     <div id="events-list" class="space-y-2"></div>
                 </div>
             </div>
@@ -84,6 +77,13 @@
         const today = new Date();
         const todayKey = `${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`;
 
+        // Função unificada para alternar tipos instantaneamente
+        function selectType(type, label) {
+            document.getElementById('event-type').value = type;
+            document.getElementById('type-label').textContent = `Tipo selecionado: ${label}`;
+            document.getElementById('input-area').classList.remove('hidden');
+        }
+
         function render() {
             const grid = document.getElementById('days-grid');
             grid.innerHTML = "";
@@ -93,29 +93,24 @@
             const last = new Date(year, month + 1, 0).getDate();
             
             document.getElementById('month-year').textContent = current.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-            
+
             for(let i=0; i<first; i++) grid.appendChild(document.createElement('div'));
-            
+
             for(let d=1; d<=last; d++) {
                 const key = `${year}-${month+1}-${d}`;
                 const btn = document.createElement('button');
                 btn.textContent = d;
-                
                 const dayEvents = data.events[key] || [];
                 const isToday = key === todayKey;
                 
                 let classes = `p-4 rounded-xl text-sm font-bold transition-all border `;
-                
-                if (isToday) {
-                    classes += 'bg-indigo-600 ring-4 ring-indigo-500/50 border-indigo-400 ';
-                } else if (dayEvents.length > 0) {
+                if (isToday) classes += 'bg-indigo-600 ring-4 ring-indigo-500/50 border-indigo-400 ';
+                else if (dayEvents.length > 0) {
                     const type = dayEvents[dayEvents.length - 1].type;
                     if(type === 'audit') classes += 'bg-red-900/20 border-red-500 ';
                     else if(type === 'medical') classes += 'bg-yellow-900/20 border-yellow-500 ';
                     else classes += 'bg-emerald-900/20 border-emerald-500 ';
-                } else {
-                    classes += 'bg-neutral-900 border-neutral-800 hover:bg-neutral-800 ';
-                }
+                } else classes += 'bg-neutral-900 border-neutral-800 hover:bg-neutral-800 ';
                 
                 if(selectedDate === key) classes += 'ring-2 ring-white ';
                 
@@ -124,7 +119,6 @@
                     selectedDate = key;
                     document.getElementById('date-title').textContent = new Date(year, month, d).toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'short' });
                     renderEvents();
-                    render();
                 };
                 grid.appendChild(btn);
             }
@@ -137,15 +131,12 @@
             const highlight = document.getElementById('events-highlight');
             list.innerHTML = "";
             const dayEvents = data.events[selectedDate] || [];
-            
             alertBox.classList.toggle('hidden', dayEvents.length === 0);
             highlight.textContent = `${dayEvents.length} registro(s) no dia.`;
-
             dayEvents.forEach((e, i) => {
                 let colorClasses = 'border-emerald-500 text-emerald-200';
                 if (e.type === 'audit') colorClasses = 'border-red-500 text-red-200';
                 if (e.type === 'medical') colorClasses = 'border-yellow-500 text-yellow-200';
-                
                 list.innerHTML += `
                     <div class="p-3 bg-neutral-900 rounded-xl text-sm border-l-4 ${colorClasses} flex justify-between items-center shadow-lg">
                         <p class="font-medium">${e.text}</p>
@@ -175,14 +166,15 @@
             renderEvents();
         };
 
-        document.getElementById('btn-vacation').onclick = () => { document.getElementById('event-type').value = 'vacation'; document.getElementById('input-area').classList.remove('hidden'); };
-        document.getElementById('btn-audit').onclick = () => { document.getElementById('event-type').value = 'audit'; document.getElementById('input-area').classList.remove('hidden'); };
-        document.getElementById('btn-medical').onclick = () => { document.getElementById('event-type').value = 'medical'; document.getElementById('input-area').classList.remove('hidden'); };
+        // Ligações dos botões
+        document.getElementById('btn-vacation').onclick = () => selectType('vacation', 'Férias');
+        document.getElementById('btn-audit').onclick = () => selectType('audit', 'Auditoria');
+        document.getElementById('btn-medical').onclick = () => selectType('medical', 'Atestado');
 
         document.getElementById('prev-month').onclick = () => { current.setMonth(current.getMonth()-1); render(); };
         document.getElementById('next-month').onclick = () => { current.setMonth(current.getMonth()+1); render(); };
         document.getElementById('go-today').onclick = () => { current = new Date(); selectedDate = todayKey; render(); renderEvents(); };
-        
+
         render();
     </script>
 </body>
