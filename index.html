@@ -6,7 +6,9 @@
     <title>Agenda Regional Ampére</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <style> body { background-color: #000; color: #fff; } </style>
+    <style>
+        body { background-color: #000; color: #fff; }
+    </style>
 </head>
 <body class="min-h-screen p-4 md:p-8">
     <div class="max-w-6xl mx-auto space-y-6">
@@ -21,6 +23,12 @@
                 </div>
             </div>
         </header>
+
+        <!-- CONTAINER DE ALERTAS DE EVENTOS (NOVO) -->
+        <div id="events-display-top" class="bg-[#111111] p-6 rounded-2xl border border-[#222222] shadow-xl hidden">
+            <h2 id="top-date-title" class="text-lg font-bold mb-4 text-indigo-400"></h2>
+            <div id="top-events-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </div>
 
         <!-- GRID PRINCIPAL -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -47,16 +55,20 @@
                         <span class="text-[10px] font-bold text-indigo-400 uppercase">Data Selecionada</span>
                         <h3 id="date-title" class="text-md font-bold">Selecione um dia</h3>
                     </div>
-                    
-                    <div id="event-alert" class="hidden p-3 bg-indigo-900/20 border border-indigo-500/30 rounded-xl">
-                        <p class="text-xs text-indigo-300 font-bold uppercase mb-1">Registros do dia:</p>
-                        <div id="events-highlight" class="text-sm"></div>
-                    </div>
 
-                    <!-- BOTÕES QUE ALTERNAM O TIPO -->
-                    <button id="btn-vacation" class="w-full flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-500 rounded-xl font-medium transition-all"> <i data-lucide="sun" class="w-4 h-4"></i> Férias </button>
-                    <button id="btn-audit" class="w-full flex items-center justify-center gap-2 py-3 bg-red-600 hover:bg-red-500 rounded-xl font-medium transition-all"> <i data-lucide="alert-triangle" class="w-4 h-4"></i> Auditoria </button>
-                    <button id="btn-medical" class="w-full flex items-center justify-center gap-2 py-3 bg-yellow-500 hover:bg-yellow-400 text-black rounded-xl font-medium transition-all"> <i data-lucide="file-text" class="w-4 h-4"></i> Atestado </button>
+                    <!-- BOTÕES -->
+                    <button id="btn-vacation" class="w-full flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-500 rounded-xl font-medium transition-all">
+                        <i data-lucide="sun" class="w-4 h-4"></i> Férias
+                    </button>
+                    <button id="btn-audit" class="w-full flex items-center justify-center gap-2 py-3 bg-red-600 hover:bg-red-500 rounded-xl font-medium transition-all">
+                        <i data-lucide="alert-triangle" class="w-4 h-4"></i> Auditoria
+                    </button>
+                    <button id="btn-medical" class="w-full flex items-center justify-center gap-2 py-3 bg-yellow-500 hover:bg-yellow-400 text-black rounded-xl font-medium transition-all">
+                        <i data-lucide="file-text" class="w-4 h-4"></i> Atestado
+                    </button>
+                    <button id="btn-other" class="w-full flex items-center justify-center gap-2 py-3 bg-orange-600 hover:bg-orange-500 rounded-xl font-medium transition-all">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Adicionar Evento
+                    </button>
 
                     <div id="input-area" class="space-y-2 hidden border-t border-neutral-800 pt-4">
                         <p id="type-label" class="text-xs font-bold text-indigo-400 uppercase"></p>
@@ -77,7 +89,16 @@
         const today = new Date();
         const todayKey = `${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`;
 
-        // Função unificada para alternar tipos instantaneamente
+        function getLabelByType(type) {
+            const map = { 'vacation': 'Férias', 'audit': 'Auditoria', 'medical': 'Atestado', 'other': 'Outro Evento' };
+            return map[type] || 'Evento';
+        }
+
+        function getColorByType(type) {
+            const map = { 'vacation': 'border-emerald-500 text-emerald-200 bg-emerald-900/20', 'audit': 'border-red-500 text-red-200 bg-red-900/20', 'medical': 'border-yellow-500 text-yellow-200 bg-yellow-900/20', 'other': 'border-orange-500 text-orange-200 bg-orange-900/20' };
+            return map[type] || 'border-neutral-500 text-neutral-200 bg-neutral-900/20';
+        }
+
         function selectType(type, label) {
             document.getElementById('event-type').value = type;
             document.getElementById('type-label').textContent = `Tipo selecionado: ${label}`;
@@ -107,11 +128,9 @@
                 if (isToday) classes += 'bg-indigo-600 ring-4 ring-indigo-500/50 border-indigo-400 ';
                 else if (dayEvents.length > 0) {
                     const type = dayEvents[dayEvents.length - 1].type;
-                    if(type === 'audit') classes += 'bg-red-900/20 border-red-500 ';
-                    else if(type === 'medical') classes += 'bg-yellow-900/20 border-yellow-500 ';
-                    else classes += 'bg-emerald-900/20 border-emerald-500 ';
+                    classes += getColorByType(type).split(' ')[2] + ' ' + getColorByType(type).split(' ')[1] + ' ';
                 } else classes += 'bg-neutral-900 border-neutral-800 hover:bg-neutral-800 ';
-                
+
                 if(selectedDate === key) classes += 'ring-2 ring-white ';
                 
                 btn.className = classes;
@@ -127,21 +146,33 @@
 
         function renderEvents() {
             const list = document.getElementById('events-list');
-            const alertBox = document.getElementById('event-alert');
-            const highlight = document.getElementById('events-highlight');
+            const topDisplay = document.getElementById('events-display-top');
+            const topList = document.getElementById('top-events-list');
+            const topTitle = document.getElementById('top-date-title');
+            
             list.innerHTML = "";
+            topList.innerHTML = "";
             const dayEvents = data.events[selectedDate] || [];
-            alertBox.classList.toggle('hidden', dayEvents.length === 0);
-            highlight.textContent = `${dayEvents.length} registro(s) no dia.`;
+            
+            if (dayEvents.length > 0) {
+                topDisplay.classList.remove('hidden');
+                topTitle.textContent = `Eventos em ${new Date(selectedDate).toLocaleDateString('pt-BR')}`;
+            } else {
+                topDisplay.classList.add('hidden');
+            }
+
             dayEvents.forEach((e, i) => {
-                let colorClasses = 'border-emerald-500 text-emerald-200';
-                if (e.type === 'audit') colorClasses = 'border-red-500 text-red-200';
-                if (e.type === 'medical') colorClasses = 'border-yellow-500 text-yellow-200';
-                list.innerHTML += `
-                    <div class="p-3 bg-neutral-900 rounded-xl text-sm border-l-4 ${colorClasses} flex justify-between items-center shadow-lg">
-                        <p class="font-medium">${e.text}</p>
+                const colorClasses = getColorByType(e.type);
+                const html = `
+                    <div class="p-4 bg-neutral-900 rounded-xl border-l-4 ${colorClasses} flex justify-between items-center shadow-lg">
+                        <div>
+                            <p class="text-[10px] font-bold uppercase opacity-70">${getLabelByType(e.type)}</p>
+                            <p class="font-medium">${e.text}</p>
+                        </div>
                         <button onclick="deleteEvent(${i})" class="text-neutral-500 hover:text-white"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                     </div>`;
+                list.innerHTML += html;
+                topList.innerHTML += html;
             });
             lucide.createIcons();
         }
@@ -166,10 +197,10 @@
             renderEvents();
         };
 
-        // Ligações dos botões
         document.getElementById('btn-vacation').onclick = () => selectType('vacation', 'Férias');
         document.getElementById('btn-audit').onclick = () => selectType('audit', 'Auditoria');
         document.getElementById('btn-medical').onclick = () => selectType('medical', 'Atestado');
+        document.getElementById('btn-other').onclick = () => selectType('other', 'Evento');
 
         document.getElementById('prev-month').onclick = () => { current.setMonth(current.getMonth()-1); render(); };
         document.getElementById('next-month').onclick = () => { current.setMonth(current.getMonth()+1); render(); };
