@@ -24,7 +24,7 @@
             </div>
         </header>
 
-        <!-- CONTAINER DE ALERTAS DE EVENTOS (NOVO) -->
+        <!-- CONTAINER DE ALERTAS DE EVENTOS -->
         <div id="events-display-top" class="bg-[#111111] p-6 rounded-2xl border border-[#222222] shadow-xl hidden">
             <h2 id="top-date-title" class="text-lg font-bold mb-4 text-indigo-400"></h2>
             <div id="top-events-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
@@ -51,6 +51,35 @@
             <!-- PAINEL -->
             <div class="bg-[#111111] p-6 rounded-2xl border border-[#222222] shadow-xl flex flex-col min-h-[450px]">
                 <div class="space-y-4 flex-grow">
+                    
+                    <!-- QUADRO: PREVISÃO DO TEMPO (AMPÉRE E REALEZA) -->
+                    <div class="bg-neutral-900 p-4 rounded-xl border border-neutral-800 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-bold text-indigo-400 uppercase">Previsão Regional (Seg a Dom)</span>
+                            <i data-lucide="cloud-sun" class="w-4 h-4 text-indigo-400"></i>
+                        </div>
+
+                        <!-- Ampére -->
+                        <div class="space-y-1.5">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-semibold text-neutral-300">Ampére - PR</span>
+                            </div>
+                            <div id="weather-ampere" class="grid grid-cols-7 gap-1 text-center">
+                                <div class="text-[10px] text-neutral-500 py-2 col-span-7">Carregando...</div>
+                            </div>
+                        </div>
+
+                        <!-- Realeza -->
+                        <div class="space-y-1.5 pt-2 border-t border-neutral-800">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-semibold text-neutral-300">Realeza - PR</span>
+                            </div>
+                            <div id="weather-realeza" class="grid grid-cols-7 gap-1 text-center">
+                                <div class="text-[10px] text-neutral-500 py-2 col-span-7">Carregando...</div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div>
                         <span class="text-[10px] font-bold text-indigo-400 uppercase">Data Selecionada</span>
                         <h3 id="date-title" class="text-md font-bold">Selecione um dia</h3>
@@ -76,6 +105,7 @@
                         <input type="hidden" id="event-type">
                         <button id="save-event" class="w-full py-2 bg-blue-600 hover:bg-blue-500 rounded-xl text-sm font-bold">Salvar</button>
                     </div>
+
                     <div id="events-list" class="space-y-2"></div>
                 </div>
             </div>
@@ -95,7 +125,12 @@
         }
 
         function getColorByType(type) {
-            const map = { 'vacation': 'border-emerald-500 text-emerald-200 bg-emerald-900/20', 'audit': 'border-red-500 text-red-200 bg-red-900/20', 'medical': 'border-yellow-500 text-yellow-200 bg-yellow-900/20', 'other': 'border-orange-500 text-orange-200 bg-orange-900/20' };
+            const map = {
+                'vacation': 'border-emerald-500 text-emerald-200 bg-emerald-900/20',
+                'audit': 'border-red-500 text-red-200 bg-red-900/20',
+                'medical': 'border-yellow-500 text-yellow-200 bg-yellow-900/20',
+                'other': 'border-orange-500 text-orange-200 bg-orange-900/20'
+            };
             return map[type] || 'border-neutral-500 text-neutral-200 bg-neutral-900/20';
         }
 
@@ -105,6 +140,94 @@
             document.getElementById('input-area').classList.remove('hidden');
         }
 
+        async function fetchCityWeather(cityName, elementId) {
+            const container = document.getElementById(elementId);
+            try {
+                const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1&language=pt&format=json`;
+                const geoResponse = await fetch(geoUrl);
+                const geoData = await geoResponse.json();
+
+                if (!geoData.results || geoData.results.length === 0) {
+                    container.innerHTML = `<div class="text-[10px] text-red-400 py-2 col-span-7">Não encontrado</div>`;
+                    return;
+                }
+
+                const { latitude, longitude } = geoData.results[0];
+                const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=America/Sao_Paulo`;
+                
+                const response = await fetch(weatherUrl);
+                const weatherData = await response.json();
+                
+                if (weatherData && weatherData.daily) {
+                    renderWeatherDays(weatherData.daily, container);
+                }
+            } catch (error) {
+                container.innerHTML = `<div class="text-[10px] text-red-400 py-2 col-span-7">Erro ao carregar</div>`;
+            }
+        }
+
+        function getWeatherIcon(code) {
+            if (code === 0) return { icon: 'sun', color: 'text-yellow-400' };
+            if (code >= 1 && code <= 3) return { icon: 'cloud-sun', color: 'text-amber-400' };
+            if (code >= 51 && code <= 67) return { icon: 'cloud-rain', color: 'text-blue-400' };
+            if (code >= 95) return { icon: 'cloud-lightning', color: 'text-purple-400' };
+            return { icon: 'cloud', color: 'text-neutral-400' };
+        }
+
+        function renderWeatherDays(daily, container) {
+            container.innerHTML = "";
+            // Mapeia do índice padrão do JS (0=Dom, 1=Seg, ..., 6=Sáb) para as abreviações solicitadas
+            const daysMap = ['Dom.', 'Seg.', 'Ter.', 'Qua.', 'Qui.', 'Sex.', 'Sáb.'];
+            
+            let times = daily.time;
+            let maxs = daily.temperature_2m_max;
+            let mins = daily.temperature_2m_min;
+            let codes = daily.weathercode;
+
+            // Ordena ou reorganiza para começar de Segunda-feira (Seg.), seguida por Ter., Qua., Qui., Sex., Sáb., Dom.
+            let rawDaysData = [];
+            for (let i = 0; i < times.length; i++) {
+                if (!times[i]) break;
+                const dateObj = new Date(times[i] + 'T00:00:00');
+                rawDaysData.push({
+                    dateObj: dateObj,
+                    dayOfWeek: dateObj.getDay(),
+                    weatherCode: codes[i],
+                    max: maxs[i],
+                    min: mins[i]
+                });
+            }
+
+            // Ordena os dias da semana para iniciar na Segunda-feira (1) até Domingo (0)
+            rawDaysData.sort((a, b) => {
+                let orderA = a.dayOfWeek === 0 ? 7 : a.dayOfWeek;
+                let orderB = b.dayOfWeek === 0 ? 7 : b.dayOfWeek;
+                return orderA - orderB;
+            });
+
+            // Renderiza exatamente 7 dias formatados
+            for (let i = 0; i < Math.min(7, rawDaysData.length); i++) {
+                const item = rawDaysData[i];
+                const weatherDetails = getWeatherIcon(item.weatherCode);
+                const maxTemp = Math.round(item.max);
+                const minTemp = Math.round(item.min);
+                const dayName = daysMap[item.dayOfWeek];
+
+                const html = `
+                    <div class="bg-neutral-800/40 p-1 rounded-lg flex flex-col items-center justify-between">
+                        <span class="text-[9px] font-bold opacity-70">${dayName}</span>
+                        <i data-lucide="${weatherDetails.icon}" class="w-3 h-3 ${weatherDetails.color} my-0.5"></i>
+                        <div class="text-[9px] leading-tight">
+                            <span class="font-bold block">${maxTemp}°</span>
+                            <span class="opacity-50">${minTemp}°</span>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += html;
+            }
+            lucide.createIcons();
+        }
+
         function render() {
             const grid = document.getElementById('days-grid');
             grid.innerHTML = "";
@@ -112,7 +235,7 @@
             const month = current.getMonth();
             const first = new Date(year, month, 1).getDay();
             const last = new Date(year, month + 1, 0).getDate();
-            
+
             document.getElementById('month-year').textContent = current.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
 
             for(let i=0; i<first; i++) grid.appendChild(document.createElement('div'));
@@ -123,16 +246,17 @@
                 btn.textContent = d;
                 const dayEvents = data.events[key] || [];
                 const isToday = key === todayKey;
-                
                 let classes = `p-4 rounded-xl text-sm font-bold transition-all border `;
+                
                 if (isToday) classes += 'bg-indigo-600 ring-4 ring-indigo-500/50 border-indigo-400 ';
                 else if (dayEvents.length > 0) {
                     const type = dayEvents[dayEvents.length - 1].type;
                     classes += getColorByType(type).split(' ')[2] + ' ' + getColorByType(type).split(' ')[1] + ' ';
-                } else classes += 'bg-neutral-900 border-neutral-800 hover:bg-neutral-800 ';
+                } else {
+                    classes += 'bg-neutral-900 border-neutral-800 hover:bg-neutral-800 ';
+                }
 
                 if(selectedDate === key) classes += 'ring-2 ring-white ';
-                
                 btn.className = classes;
                 btn.onclick = () => {
                     selectedDate = key;
@@ -153,7 +277,7 @@
             list.innerHTML = "";
             topList.innerHTML = "";
             const dayEvents = data.events[selectedDate] || [];
-            
+
             if (dayEvents.length > 0) {
                 topDisplay.classList.remove('hidden');
                 topTitle.textContent = `Eventos em ${new Date(selectedDate).toLocaleDateString('pt-BR')}`;
@@ -202,11 +326,26 @@
         document.getElementById('btn-medical').onclick = () => selectType('medical', 'Atestado');
         document.getElementById('btn-other').onclick = () => selectType('other', 'Evento');
 
-        document.getElementById('prev-month').onclick = () => { current.setMonth(current.getMonth()-1); render(); };
-        document.getElementById('next-month').onclick = () => { current.setMonth(current.getMonth()+1); render(); };
-        document.getElementById('go-today').onclick = () => { current = new Date(); selectedDate = todayKey; render(); renderEvents(); };
+        document.getElementById('prev-month').onclick = () => {
+            current.setMonth(current.getMonth()-1);
+            render();
+        };
+
+        document.getElementById('next-month').onclick = () => {
+            current.setMonth(current.getMonth()+1);
+            render();
+        };
+
+        document.getElementById('go-today').onclick = () => {
+            current = new Date();
+            selectedDate = todayKey;
+            render();
+            renderEvents();
+        };
 
         render();
+        fetchCityWeather("Ampére", "weather-ampere");
+        fetchCityWeather("Realeza", "weather-realeza");
     </script>
 </body>
 </html>
