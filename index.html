@@ -24,7 +24,7 @@
             </div>
         </header>
 
-        <!-- CONTAINER DE ALERTAS DE EVENTOS -->
+        <!-- CONTAINER DE ALERTAS DE EVENTOS (TOPO) -->
         <div id="events-display-top" class="bg-[#111111] p-6 rounded-2xl border border-[#222222] shadow-xl hidden">
             <h2 id="top-date-title" class="text-lg font-bold mb-4 text-indigo-400"></h2>
             <div id="top-events-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
@@ -105,8 +105,6 @@
                         <input type="hidden" id="event-type">
                         <button id="save-event" class="w-full py-2 bg-blue-600 hover:bg-blue-500 rounded-xl text-sm font-bold">Salvar</button>
                     </div>
-
-                    <div id="events-list" class="space-y-2"></div>
                 </div>
             </div>
         </div>
@@ -176,7 +174,6 @@
 
         function renderWeatherDays(daily, container) {
             container.innerHTML = "";
-            // Mapeia do índice padrão do JS (0=Dom, 1=Seg, ..., 6=Sáb) para as abreviações solicitadas
             const daysMap = ['Dom.', 'Seg.', 'Ter.', 'Qua.', 'Qui.', 'Sex.', 'Sáb.'];
             
             let times = daily.time;
@@ -184,7 +181,6 @@
             let mins = daily.temperature_2m_min;
             let codes = daily.weathercode;
 
-            // Ordena ou reorganiza para começar de Segunda-feira (Seg.), seguida por Ter., Qua., Qui., Sex., Sáb., Dom.
             let rawDaysData = [];
             for (let i = 0; i < times.length; i++) {
                 if (!times[i]) break;
@@ -198,14 +194,12 @@
                 });
             }
 
-            // Ordena os dias da semana para iniciar na Segunda-feira (1) até Domingo (0)
             rawDaysData.sort((a, b) => {
                 let orderA = a.dayOfWeek === 0 ? 7 : a.dayOfWeek;
                 let orderB = b.dayOfWeek === 0 ? 7 : b.dayOfWeek;
                 return orderA - orderB;
             });
 
-            // Renderiza exatamente 7 dias formatados
             for (let i = 0; i < Math.min(7, rawDaysData.length); i++) {
                 const item = rawDaysData[i];
                 const weatherDetails = getWeatherIcon(item.weatherCode);
@@ -269,12 +263,10 @@
         }
 
         function renderEvents() {
-            const list = document.getElementById('events-list');
             const topDisplay = document.getElementById('events-display-top');
             const topList = document.getElementById('top-events-list');
             const topTitle = document.getElementById('top-date-title');
             
-            list.innerHTML = "";
             topList.innerHTML = "";
             const dayEvents = data.events[selectedDate] || [];
 
@@ -295,7 +287,6 @@
                         </div>
                         <button onclick="deleteEvent(${i})" class="text-neutral-500 hover:text-white"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                     </div>`;
-                list.innerHTML += html;
                 topList.innerHTML += html;
             });
             lucide.createIcons();
